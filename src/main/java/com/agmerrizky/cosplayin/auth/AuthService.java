@@ -59,7 +59,7 @@ public class AuthService {
 
             if (user == null) {
                 user = userService.createUser(authData.givenName(), authData.email(), OauthProvider.GOOGLE,
-                        authData.sub());
+                        authData.sub(), authData.picture());
             }
 
             String cookieAccessToken = jwtUtils.generateToken(user.getId(), user.getRole().toString());

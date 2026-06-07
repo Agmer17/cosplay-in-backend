@@ -1,7 +1,5 @@
 package com.agmerrizky.cosplayin.common.security.aspect;
 
-import java.util.UUID;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -38,7 +36,6 @@ public class RequireAspectRole {
                 .getRequest();
 
         UserRoleType currentUserRole = (UserRoleType) request.getAttribute("role");
-        UUID id = (UUID) request.getAttribute("id");
         String required = requireRole.value();
 
         if (!required.equals(currentUserRole.toString())) {

@@ -1,5 +1,6 @@
 package com.agmerrizky.cosplayin.config;
 
+import org.apache.tika.Tika;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,8 +10,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AppConfig {
 
     @Bean
-    public ObjectMapper objectMapper() {
+    ObjectMapper objectMapper() {
         return new ObjectMapper();
+    }
+
+    @Bean
+    Tika tika() {
+        return new Tika();
     }
 
 }

@@ -12,9 +12,13 @@ import com.agmerrizky.cosplayin.common.anotations.RequireRole;
 import com.agmerrizky.cosplayin.common.api.SuccessResponse;
 import com.agmerrizky.cosplayin.common.entity.Users;
 import com.agmerrizky.cosplayin.common.type.CurrentUserContext;
+import com.agmerrizky.cosplayin.users.dto.UpdateUserDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @RequiredArgsConstructor
 @RestController
@@ -36,12 +40,25 @@ public class UsersController {
     }
 
     @GetMapping("/my-profile")
-    public ResponseEntity<SuccessResponse<Users>> getMethodName(@CurrentUser CurrentUserContext curr) {
+    public ResponseEntity<SuccessResponse<Users>> getMyProfiles(@CurrentUser CurrentUserContext curr) {
         Users data = service.getUserById(curr.id());
         return ResponseEntity.ok().body(
                 SuccessResponse.<Users>builder()
                         .message("succesfully getting your data")
                         .data(data)
+                        .build());
+    }
+
+    @PatchMapping("/my-profile")
+    public ResponseEntity<SuccessResponse<Users>> updateMyProfiles(
+            @CurrentUser CurrentUserContext curr,
+            @Valid @ModelAttribute UpdateUserDto dto) {
+        Users updatedData = service.updateUsers(dto, curr.id());
+
+        return ResponseEntity.ok().body(
+                SuccessResponse.<Users>builder()
+                        .message("successfully update your data")
+                        .data(updatedData)
                         .build());
     }
 

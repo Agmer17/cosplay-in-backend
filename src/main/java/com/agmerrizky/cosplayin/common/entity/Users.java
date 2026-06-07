@@ -47,7 +47,7 @@ public class Users {
     @Column(nullable = false)
     private String fullName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false)
     @NotBlank
     @Email(message = "please provide a valid email!")
     private String email;

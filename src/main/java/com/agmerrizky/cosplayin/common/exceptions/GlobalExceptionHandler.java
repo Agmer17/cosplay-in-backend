@@ -3,10 +3,9 @@ package com.agmerrizky.cosplayin.common.exceptions;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -31,8 +30,8 @@ public class GlobalExceptionHandler {
                                                 .build());
         }
 
-        @ExceptionHandler(BadRequestException.class)
-        public ResponseEntity<ErrorResponse<String>> handleBadRequest(BadRequestException ex) {
+        @ExceptionHandler(BadRequestsException.class)
+        public ResponseEntity<ErrorResponse<String>> handleBadRequest(BadRequestsException ex) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                 .body(ErrorResponse.<String>builder()
                                                 .error(ex.getMessage())
