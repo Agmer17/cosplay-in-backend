@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -28,6 +27,9 @@ public class UpdateUserDto {
     private String phoneNumber;
 
     private String description;
+
+    @Pattern(regexp = "^(ADMIN|MODERATOR|USER)$", message = "invalid role type")
+    private String role;
 
     private LocalDate birthday;
 

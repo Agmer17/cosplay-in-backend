@@ -2,6 +2,7 @@ package com.agmerrizky.cosplayin.users;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.agmerrizky.cosplayin.common.entity.Users;
+import com.agmerrizky.cosplayin.common.type.CurrentUserContext;
 import com.agmerrizky.cosplayin.common.type.OauthProvider;
 import com.agmerrizky.cosplayin.common.type.UserRoleType;
 import com.agmerrizky.cosplayin.users.dto.UpdateUserDto;
@@ -22,6 +24,7 @@ import jakarta.validation.ConstraintViolationException;
 import com.agmerrizky.cosplayin.common.exceptions.BadRequestsException;
 import com.agmerrizky.cosplayin.common.exceptions.ConflictDataException;
 import com.agmerrizky.cosplayin.common.exceptions.FatalError;
+import com.agmerrizky.cosplayin.common.exceptions.ForbiddenAccessException;
 import com.agmerrizky.cosplayin.common.exceptions.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
@@ -111,6 +114,65 @@ public class UsersService {
         return user;
     }
 
+    @Transactional
+    public Users updateUsers(UpdateUserDto dto, CurrentUserContext curr, UUID target) {
+
+        if (curr.role() != UserRoleType.ADMIN) {
+            throw new ForbiddenAccessException("you don't have access to this feature");
+        }
+
+        Users user = repo.findById(target).orElseThrow(() -> new NotFoundException("user with this id not found"));
+
+        if (dto.getFullName() != null && user.getFullName() != dto.getFullName()) {
+            user.setFullName(dto.getFullName());
+        }
+        // phone number
+        if (dto.getPhoneNumber() != null && user.getPhoneNumber() != dto.getPhoneNumber()) {
+            user.setPhoneNumber(dto.getPhoneNumber());
+        }
+
+        // description
+        if (dto.getDescription() != null && user.getDescription() != dto.getDescription()) {
+            user.setDescription(dto.getDescription());
+        }
+
+        // birthday
+        if (dto.getBirthday() != null && user.getBirthday() != dto.getBirthday()) {
+            user.setBirthday(dto.getBirthday());
+        }
+
+        if (dto.getRole() != null) {
+            try {
+                user.setRole(UserRoleType.valueOf(dto.getRole()));
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestsException("invalid user type, please only insert ADMIN, MODERATOR OR USER");
+            }
+        }
+
+        if (dto.getProfilePicture() != null) {
+            user.setProfilePicture(
+                    replaceUserFile(
+                            dto.getProfilePicture(),
+                            user.getProfilePicture(),
+                            USER_PROFILE_PIC_DIR));
+        }
+
+        if (dto.getBannerPicture() != null) {
+            user.setBannerPicture(
+                    replaceUserFile(
+                            dto.getBannerPicture(),
+                            user.getBannerPicture(),
+                            USER_BANNER_PIC_DIR));
+        }
+        return user;
+    }
+
+    @Transactional
+    public void deleteUsers(UUID id) {
+        Users user = repo.findById(id).orElseThrow(() -> new NotFoundException("user with this id not found"));
+        user.setDeletedAt(LocalDateTime.now());
+    }
+
     private void deleteUserFile(String relativePath) {
         if (relativePath == null) {
             return;
@@ -164,4 +226,5 @@ public class UsersService {
         deleteUserFile(oldFile);
         return saveUserFile(newFile, directory);
     }
+
 }

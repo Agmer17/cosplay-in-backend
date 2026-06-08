@@ -17,6 +17,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -30,7 +31,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users_email_active", columnList = "email, deletedAt"),
+        @Index(name = "idx_users_oauth_active", columnList = "oauthProvider, oauthProviderId, deletedAt")
+})
+@SQLRestriction(value = "deleted_at is NULL")
 @Getter
 @Setter
 @Builder
@@ -47,7 +52,7 @@ public class Users {
     @Column(nullable = false)
     private String fullName;
 
-    @Column(nullable = false, unique = true, updatable = false)
+    @Column(nullable = false, updatable = false)
     @NotBlank
     @Email(message = "please provide a valid email!")
     private String email;
@@ -87,6 +92,5 @@ public class Users {
     private LocalDateTime createdAt;
 
     @Column
-    @SQLRestriction(value = "deleted_at is NULL")
     private LocalDateTime deletedAt;
 }
