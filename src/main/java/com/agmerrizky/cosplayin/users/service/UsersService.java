@@ -1,4 +1,4 @@
-package com.agmerrizky.cosplayin.users;
+package com.agmerrizky.cosplayin.users.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,6 +14,7 @@ import com.agmerrizky.cosplayin.common.type.CurrentUserContext;
 import com.agmerrizky.cosplayin.common.type.OauthProvider;
 import com.agmerrizky.cosplayin.common.type.UserRoleType;
 import com.agmerrizky.cosplayin.users.dto.UpdateUserDto;
+import com.agmerrizky.cosplayin.users.repository.UsersRepository;
 import com.agmerrizky.cosplayin.utils.ServerStorage;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -165,6 +166,10 @@ public class UsersService {
                             USER_BANNER_PIC_DIR));
         }
         return user;
+    }
+
+    public Users getUsersProxy(UUID id) {
+        return repo.getReferenceById(id);
     }
 
     @Transactional

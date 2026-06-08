@@ -1,4 +1,4 @@
-package com.agmerrizky.cosplayin.users;
+package com.agmerrizky.cosplayin.users.controller;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,6 +14,7 @@ import com.agmerrizky.cosplayin.common.api.SuccessResponse;
 import com.agmerrizky.cosplayin.common.entity.Users;
 import com.agmerrizky.cosplayin.common.type.CurrentUserContext;
 import com.agmerrizky.cosplayin.users.dto.UpdateUserDto;
+import com.agmerrizky.cosplayin.users.service.UsersService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

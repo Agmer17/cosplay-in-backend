@@ -1,4 +1,4 @@
-package com.agmerrizky.cosplayin.users;
+package com.agmerrizky.cosplayin.users.repository;
 
 import java.util.Optional;
 import java.util.UUID;

@@ -1,8 +1,9 @@
-package com.agmerrizky.cosplayin.auth;
+package com.agmerrizky.cosplayin.auth.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.agmerrizky.cosplayin.auth.service.AuthService;
 import com.agmerrizky.cosplayin.common.api.SuccessResponse;
 
 import lombok.RequiredArgsConstructor;

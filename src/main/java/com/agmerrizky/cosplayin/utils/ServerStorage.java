@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.agmerrizky.cosplayin.common.exceptions.BadRequestsException;
+import com.agmerrizky.cosplayin.common.type.MediaType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -81,7 +82,6 @@ public class ServerStorage {
             finalDests[i] = destination.resolve(filename + "." + tp[1]);
         }
 
-        // 2. Lempar ke method concurrent yang sudah kamu buat sebelumnya
         return saveFileToDisk(files, finalDests);
     }
 
@@ -219,5 +219,29 @@ public class ServerStorage {
     public void deletePrivateFile(String... paths) throws IOException {
         Path file = resolveDestination(PRIVATE_STORAGE, paths);
         deleteFile(file);
+    }
+
+    public static MediaType getMediaTypeFromFilename(String filename) {
+        String extension = getExtension(filename);
+
+        return switch (extension) {
+            case "jpg", "jpeg", "png", "webp" -> MediaType.IMAGE;
+            case "gif" -> MediaType.GIF;
+            case "mp4" -> MediaType.VIDEO;
+            case "mp3", "wav", "ogg", "m4a", "aac" -> MediaType.VOICE_MESSAGE;
+            default -> throw new IllegalArgumentException(
+                    "Unsupported media extension: " + extension);
+        };
+    }
+
+    private static String getExtension(String filename) {
+        int lastDot = filename.lastIndexOf('.');
+
+        if (lastDot == -1 || lastDot == filename.length() - 1) {
+            throw new IllegalArgumentException(
+                    "Filename does not have a valid extension: " + filename);
+        }
+
+        return filename.substring(lastDot + 1).toLowerCase();
     }
 }

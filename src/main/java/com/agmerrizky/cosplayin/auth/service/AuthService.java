@@ -1,4 +1,4 @@
-package com.agmerrizky.cosplayin.auth;
+package com.agmerrizky.cosplayin.auth.service;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -9,7 +9,7 @@ import com.agmerrizky.cosplayin.auth.dto.AuthGoogleCallbackDto;
 import com.agmerrizky.cosplayin.common.entity.Users;
 import com.agmerrizky.cosplayin.common.exceptions.FatalError;
 import com.agmerrizky.cosplayin.common.type.OauthProvider;
-import com.agmerrizky.cosplayin.users.UsersService;
+import com.agmerrizky.cosplayin.users.service.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuthRequest;
