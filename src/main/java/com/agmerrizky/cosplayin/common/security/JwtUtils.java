@@ -24,10 +24,9 @@ public class JwtUtils {
                 key.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(UUID id, String role) {
+    public String generateToken(UUID id) {
         return Jwts.builder()
                 .subject(id.toString())
-                .claim("role", role.toUpperCase())
                 .claim("id", id)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))

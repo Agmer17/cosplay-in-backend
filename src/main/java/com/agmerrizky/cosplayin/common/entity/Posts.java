@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.agmerrizky.cosplayin.common.type.PostType;
@@ -25,7 +27,10 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@NamedEntityGraph(name = "Posts.withMedia", attributeNodes = @NamedAttributeNode("media"))
+@NamedEntityGraph(name = "Posts.withDetails", attributeNodes = {
+        @NamedAttributeNode("media"),
+        @NamedAttributeNode("user")
+})
 public class Posts {
 
     @Id
@@ -40,6 +45,7 @@ public class Posts {
     // Self-referencing: reply ke post lain (thread)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reply_to_post_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Posts replyTo;
 
     // Self-referencing: repost (RT tanpa komentar)
@@ -96,12 +102,4 @@ public class Posts {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    // Soft delete — row tidak benar-benar dihapus, hanya ditandai
-    @Column
-    private LocalDateTime deletedAt;
-
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
 }

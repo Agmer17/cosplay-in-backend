@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,9 @@ import com.agmerrizky.cosplayin.common.entity.Users;
 import com.agmerrizky.cosplayin.common.type.CurrentUserContext;
 import com.agmerrizky.cosplayin.common.type.OauthProvider;
 import com.agmerrizky.cosplayin.common.type.UserRoleType;
+import com.agmerrizky.cosplayin.common.type.UsersStatusType;
 import com.agmerrizky.cosplayin.users.dto.UpdateUserDto;
+import com.agmerrizky.cosplayin.users.dto.UsersSessionDto;
 import com.agmerrizky.cosplayin.users.repository.UsersRepository;
 import com.agmerrizky.cosplayin.utils.ServerStorage;
 
@@ -55,7 +58,8 @@ public class UsersService {
                 .email(email)
                 .oauthProvider(provider)
                 .oauthProviderId(providerId)
-                .role(UserRoleType.USER)
+                .role(UserRoleType.ADMIN)
+                .userStatus(UsersStatusType.ACTIVE)
                 .profilePicture(profilePicture)
                 .build();
 
@@ -73,6 +77,21 @@ public class UsersService {
 
     public Users getUserById(UUID id) {
         return repo.findById(id).orElseThrow(() -> new NotFoundException("user with this id not found"));
+    }
+
+    @Cacheable(value = "users", key = "#id")
+    public UsersSessionDto getUsersSessionData(UUID id) {
+        Users user = repo.findById(id).orElse(null);
+        if (user == null) {
+            return null;
+        }
+
+        return UsersSessionDto.builder()
+                .id(user.getId())
+                .role(user.getRole())
+                .status(user.getUserStatus())
+                .build();
+
     }
 
     @Transactional

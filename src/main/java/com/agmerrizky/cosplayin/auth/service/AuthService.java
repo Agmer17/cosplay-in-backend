@@ -10,7 +10,6 @@ import com.agmerrizky.cosplayin.common.entity.Users;
 import com.agmerrizky.cosplayin.common.exceptions.FatalError;
 import com.agmerrizky.cosplayin.common.type.OauthProvider;
 import com.agmerrizky.cosplayin.users.service.UsersService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Response;
@@ -20,6 +19,7 @@ import com.github.scribejava.core.oauth.OAuth20Service;
 import com.agmerrizky.cosplayin.common.security.JwtUtils;
 
 import lombok.RequiredArgsConstructor;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +62,7 @@ public class AuthService {
                         authData.sub(), authData.picture());
             }
 
-            String cookieAccessToken = jwtUtils.generateToken(user.getId(), user.getRole().toString());
+            String cookieAccessToken = jwtUtils.generateToken(user.getId());
 
             return cookieAccessToken;
         } catch (InterruptedException | ExecutionException | IOException e) {

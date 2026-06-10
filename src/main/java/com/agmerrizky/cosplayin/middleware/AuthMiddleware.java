@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import com.agmerrizky.cosplayin.common.security.JwtUtils;
-import com.agmerrizky.cosplayin.common.type.UserRoleType;
+import com.agmerrizky.cosplayin.users.dto.UsersSessionDto;
+import com.agmerrizky.cosplayin.users.service.UsersService;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthMiddleware implements HandlerInterceptor {
 
     private final JwtUtils jwtUtils;
+    private final UsersService usersService;
 
     @Override
     public boolean preHandle(
@@ -44,20 +46,23 @@ public class AuthMiddleware implements HandlerInterceptor {
         if (accessToken != null && !accessToken.trim().isEmpty()) {
             try {
                 Claims claim = this.jwtUtils.parseToken(accessToken);
-
                 String idStr = claim.getSubject();
-                String roleStr = claim.get("role", String.class);
-
-                if (idStr != null && roleStr != null) {
+                System.out.println("\n\n\n\n\n\n MIDDLEWARE ACCCESSING JWT ID WHICH IS : " + idStr);
+                if (idStr != null) {
                     UUID id = UUID.fromString(idStr);
-                    UserRoleType role = UserRoleType.valueOf(roleStr);
+                    UsersSessionDto user = usersService.getUsersSessionData(id);
 
-                    request.setAttribute("id", id);
-                    request.setAttribute("role", role);
+                    if (user != null) {
+                        request.setAttribute("id", id);
+                        request.setAttribute("role", user.role());
+                        request.setAttribute("status", user.status());
+                    }
+
                 }
 
             } catch (Exception e) {
                 System.out.println("JWT Parsing Error: " + e.getMessage());
+                e.printStackTrace();
             }
         }
 

@@ -9,6 +9,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import com.agmerrizky.cosplayin.common.type.OauthProvider;
 import com.agmerrizky.cosplayin.common.type.UserRoleType;
+import com.agmerrizky.cosplayin.common.type.UsersStatusType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -86,6 +87,21 @@ public class Users {
 
     @Column
     private LocalDate birthday;
+
+    // persiapan buat ban dan suspend akun dkk
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private UsersStatusType userStatus = UsersStatusType.ACTIVE;
+
+    @Column(length = 500)
+    private String statusReason;
+
+    @Column
+    private UUID statusChangedBy;
+
+    @Column
+    private LocalDateTime statusAt;
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false)

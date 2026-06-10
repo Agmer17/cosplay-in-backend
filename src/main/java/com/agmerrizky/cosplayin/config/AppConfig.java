@@ -4,19 +4,19 @@ import org.apache.tika.Tika;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @Configuration
 public class AppConfig {
 
-    @Bean
-    ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
+        @Bean
+        ObjectMapper objectMapper() {
+                return new ObjectMapper();
+        }
 
-    @Bean
-    Tika tika() {
-        return new Tika();
-    }
+        @Bean
+        Tika tika() {
+                return new Tika();
+        }
 
 }

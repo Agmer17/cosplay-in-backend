@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.agmerrizky.cosplayin.common.entity.Posts;
@@ -84,11 +88,17 @@ public class PostsService {
                 .build();
 
         if (postType == PostType.REPLY) {
-            posts.setReplyTo(postsRepo.getReferenceById(dto.getReplyTo()));
+            Posts refPosts = postsRepo.getReferenceById(dto.getReplyTo());
+            posts.setReplyTo(refPosts);
+            refPosts.setReplyCount(refPosts.getReplyCount() + 1);
         } else if (postType == PostType.REPOST) {
-            posts.setRepostOf(postsRepo.getReferenceById(dto.getRepostOf()));
+            Posts refPosts = postsRepo.getReferenceById(dto.getRepostOf());
+            posts.setRepostOf(refPosts);
+            refPosts.setRepostCount(refPosts.getRepostCount() + 1);
         } else if (postType == PostType.QUOTE) {
-            posts.setQuoteOf(postsRepo.getReferenceById(dto.getQuoteOf()));
+            Posts refPosts = postsRepo.getReferenceById(dto.getQuoteOf());
+            posts.setQuoteOf(refPosts);
+            refPosts.setQuoteCount(refPosts.getQuoteCount() + 1);
         }
 
         // 6. Handle Media (Dilewati jika ini adalah Repost)
@@ -133,6 +143,16 @@ public class PostsService {
         } catch (DataIntegrityViolationException e) {
             throw new ConflictDataException("user data integrity is violated : " + e.getMessage());
         }
+
         return posts;
+    }
+
+    public Posts getPostsById(UUID id) {
+        return postsRepo.findById(id).orElseThrow(() -> new BadRequestsException("posts not found"));
+    }
+
+    public List<Posts> getReplyFromPosts(UUID id, int page) {
+        Pageable data = PageRequest.of(page, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return postsRepo.findByReplyTo_Id(id, data).getContent();
     }
 }
