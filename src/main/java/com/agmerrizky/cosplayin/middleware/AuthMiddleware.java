@@ -51,10 +51,13 @@ public class AuthMiddleware implements HandlerInterceptor {
                 if (idStr != null) {
                     UUID id = UUID.fromString(idStr);
                     UsersSessionDto user = usersService.getUsersSessionData(id);
+                    System.out.println("USER CLASS SESSIONNYA : " + user.getClass());
 
                     if (user != null) {
+                        System.out.println("USER CLASS SESSIONNYA : " + user.getClass());
                         request.setAttribute("id", id);
                         request.setAttribute("role", user.role());
+                        System.out.println("ROLE USERNYA SEKARANG : " + user.role());
                         request.setAttribute("status", user.status());
                     }
 

@@ -18,9 +18,9 @@ import lombok.*;
 
 @Entity
 @Table(name = "posts", indexes = {
-        @Index(name = "idx_posts_user_id", columnList = "user_id"),
-        @Index(name = "idx_posts_reply_to", columnList = "reply_to_post_id"),
-        @Index(name = "idx_posts_created_at", columnList = "created_at DESC")
+                @Index(name = "idx_posts_user_id", columnList = "user_id"),
+                @Index(name = "idx_posts_reply_to", columnList = "reply_to_post_id"),
+                @Index(name = "idx_posts_created_at", columnList = "created_at DESC")
 })
 @Getter
 @Setter
@@ -28,78 +28,81 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @NamedEntityGraph(name = "Posts.withDetails", attributeNodes = {
-        @NamedAttributeNode("media"),
-        @NamedAttributeNode("user")
+                @NamedAttributeNode("media"),
+                @NamedAttributeNode("user")
 })
 public class Posts {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.UUID)
+        private UUID id;
 
-    // Relasi ke user — ManyToOne, FK ada di sini
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+        // Relasi ke user — ManyToOne, FK ada di sini
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "user_id", nullable = false)
+        private Users user;
 
-    // Self-referencing: reply ke post lain (thread)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reply_to_post_id")
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    private Posts replyTo;
+        // Self-referencing: reply ke post lain (thread)
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "reply_to_post_id")
+        @OnDelete(action = OnDeleteAction.SET_NULL)
+        private Posts replyTo;
 
-    // Self-referencing: repost (RT tanpa komentar)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "repost_of_post_id")
-    private Posts repostOf;
+        // Self-referencing: repost (RT tanpa komentar)
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "repost_of_post_id")
+        private Posts repostOf;
 
-    // Self-referencing: quote tweet
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "quote_of_post_id")
-    private Posts quoteOf;
+        // Self-referencing: quote tweet
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "quote_of_post_id")
+        private Posts quoteOf;
 
-    @Column(length = 280)
-    private String content;
+        @Column(length = 280)
+        private String content;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PostType postType;
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false)
+        private PostType postType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PostsVisibility visibility;
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false)
+        private PostsVisibility visibility;
 
-    // Counter — disimpan di kolom agar query feed cepat, bukan COUNT() tiap kali
-    @Column(nullable = false)
-    @Builder.Default
-    private int likeCount = 0;
-    @Column(nullable = false)
-    @Builder.Default
-    private int repostCount = 0;
-    @Column(nullable = false)
-    @Builder.Default
-    private int replyCount = 0;
-    @Column(nullable = false)
-    @Builder.Default
-    private int quoteCount = 0;
-    @Column(nullable = false)
-    @Builder.Default
-    private int bookmarkCount = 0;
+        // Counter — disimpan di kolom agar query feed cepat, bukan COUNT() tiap kali
+        @Column(nullable = false)
+        @Builder.Default
+        private int likeCount = 0;
+        @Column(nullable = false)
+        @Builder.Default
+        private int repostCount = 0;
+        @Column(nullable = false)
+        @Builder.Default
+        private int replyCount = 0;
+        @Column(nullable = false)
+        @Builder.Default
+        private int quoteCount = 0;
+        @Column(nullable = false)
+        @Builder.Default
+        private int bookmarkCount = 0;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean isSensitive = false;
+        @Column(nullable = false)
+        @Builder.Default
+        private boolean isSensitive = false;
 
-    // Media attachment
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("displayOrder ASC")
-    @JsonManagedReference
-    private List<PostsMedia> media;
+        // Media attachment
+        @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+        @OrderBy("displayOrder ASC")
+        @JsonManagedReference
+        private List<PostsMedia> media;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;
+        @CreationTimestamp
+        @Column(updatable = false, nullable = false)
+        private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+        @UpdateTimestamp
+        private LocalDateTime updatedAt;
+
+        @Column
+        private LocalDateTime deletedAt;
 }

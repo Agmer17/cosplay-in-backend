@@ -6,10 +6,13 @@ import com.agmerrizky.cosplayin.posts.dto.response.PostsMediaResponse;
 import com.agmerrizky.cosplayin.posts.dto.response.PostsSummaryResponse;
 import com.agmerrizky.cosplayin.posts.dto.response.PublicUserSummaryResponse;
 
+import lombok.Builder;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Builder
 public record PostsResponse(
                 UUID id,
                 PublicUserSummaryResponse author,
@@ -32,7 +35,10 @@ public record PostsResponse(
                 int quoteCount,
                 int bookmarkCount,
 
+                boolean isLiked,
+
                 boolean isSensitive,
                 LocalDateTime createdAt,
-                LocalDateTime updatedAt) {
+                LocalDateTime updatedAt,
+                LocalDateTime deletedAt) {
 }

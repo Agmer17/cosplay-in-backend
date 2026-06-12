@@ -6,6 +6,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -86,11 +88,9 @@ public class UsersService {
             return null;
         }
 
-        return UsersSessionDto.builder()
-                .id(user.getId())
-                .role(user.getRole())
-                .status(user.getUserStatus())
-                .build();
+        UsersSessionDto dto = new UsersSessionDto(id, user.getRole(), user.getUserStatus());
+
+        return dto;
 
     }
 
@@ -135,6 +135,7 @@ public class UsersService {
     }
 
     @Transactional
+    @CachePut(value = "users", key = "#id")
     public Users updateUsers(UpdateUserDto dto, CurrentUserContext curr, UUID target) {
 
         if (curr.role() != UserRoleType.ADMIN) {
@@ -192,6 +193,7 @@ public class UsersService {
     }
 
     @Transactional
+    @CacheEvict(value = "users", key = "#id")
     public void deleteUsers(UUID id) {
         Users user = repo.findById(id).orElseThrow(() -> new NotFoundException("user with this id not found"));
         user.setDeletedAt(LocalDateTime.now());
@@ -247,7 +249,10 @@ public class UsersService {
         } catch (IOException e) {
             throw new FatalError("something wrong while trying to save the user data");
         }
-        deleteUserFile(oldFile);
+
+        if (!oldFile.contains("https")) {
+            deleteUserFile(oldFile);
+        }
         return saveUserFile(newFile, directory);
     }
 

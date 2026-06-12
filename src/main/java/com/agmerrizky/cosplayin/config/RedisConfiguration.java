@@ -12,59 +12,36 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
-import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import tools.jackson.databind.DefaultTyping;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
 @Configuration
 public class RedisConfiguration {
 
         @Bean
-        RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
+        RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory,
+                        GenericJacksonJsonRedisSerializer serializer) {
                 RedisTemplate<String, Object> template = new RedisTemplate<>();
                 template.setConnectionFactory(factory);
-
-                // Jackson 3 serializer untuk RedisTemplate (typed, pakai
-                // JacksonJsonRedisSerializer)
-                JacksonJsonRedisSerializer<Object> serializer = new JacksonJsonRedisSerializer<>(
-                                JsonMapper.builder()
-                                                .activateDefaultTyping(
-                                                                BasicPolymorphicTypeValidator.builder()
-                                                                                .allowIfBaseType(Object.class)
-                                                                                .build(),
-                                                                DefaultTyping.NON_FINAL,
-                                                                JsonTypeInfo.As.PROPERTY)
-                                                .build(),
-                                Object.class);
-
                 template.setKeySerializer(new StringRedisSerializer());
                 template.setHashKeySerializer(new StringRedisSerializer());
                 template.setValueSerializer(serializer);
                 template.setHashValueSerializer(serializer);
                 template.afterPropertiesSet();
-
                 return template;
         }
 
         @Bean
-        public CacheManager cacheManager(RedisConnectionFactory factory) {
-
-                JsonMapper mapper = JsonMapper.builder()
-                                .activateDefaultTyping(
-                                                BasicPolymorphicTypeValidator.builder()
-                                                                .allowIfBaseType(Object.class)
-                                                                .build(),
-                                                DefaultTyping.NON_FINAL,
-                                                JsonTypeInfo.As.PROPERTY)
+        GenericJacksonJsonRedisSerializer genericJacksonJsonRedisSerializer() {
+                GenericJacksonJsonRedisSerializer serializer = GenericJacksonJsonRedisSerializer.builder()
+                                .enableUnsafeDefaultTyping()
                                 .build();
 
-                GenericJacksonJsonRedisSerializer genericSerializer = new GenericJacksonJsonRedisSerializer(mapper);
+                return serializer;
+        }
+
+        @Bean
+        CacheManager cacheManager(RedisConnectionFactory factory, GenericJacksonJsonRedisSerializer serializer) {
                 RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                                 .entryTtl(Duration.ofMinutes(10))
                                 .serializeKeysWith(
@@ -72,9 +49,8 @@ public class RedisConfiguration {
                                                                 .fromSerializer(new StringRedisSerializer()))
                                 .serializeValuesWith(
                                                 RedisSerializationContext.SerializationPair
-                                                                .fromSerializer(genericSerializer));
-                // Hapus disableCachingNullValues() karena sudah pakai
-                // enableSpringCacheNullValueSupport()
+                                                                .fromSerializer(serializer))
+                                .disableCachingNullValues();
 
                 Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
                 cacheConfigs.put("users", defaultConfig.entryTtl(Duration.ofHours(24)));

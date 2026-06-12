@@ -2,6 +2,7 @@ package com.agmerrizky.cosplayin.posts.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -11,12 +12,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.agmerrizky.cosplayin.common.entity.Posts;
 import com.agmerrizky.cosplayin.common.entity.PostsMedia;
 import com.agmerrizky.cosplayin.common.exceptions.BadRequestsException;
 import com.agmerrizky.cosplayin.common.exceptions.ConflictDataException;
 import com.agmerrizky.cosplayin.common.exceptions.FatalError;
+import com.agmerrizky.cosplayin.common.exceptions.NotFoundException;
 import com.agmerrizky.cosplayin.common.type.CurrentUserContext;
 import com.agmerrizky.cosplayin.common.type.MediaType;
 import com.agmerrizky.cosplayin.common.type.PostType;
@@ -36,6 +39,7 @@ public class PostsService {
     private final ServerStorage storage;
     private final String PUBLIC_POSTS_DIR = "posts";
     private final UsersService usersService;
+    // private final PostsMediaRepository mediaRepository;
 
     public Posts createPosts(CreatePostsDto dto, CurrentUserContext curr) {
         int referenceCount = 0;
@@ -148,11 +152,37 @@ public class PostsService {
     }
 
     public Posts getPostsById(UUID id) {
-        return postsRepo.findById(id).orElseThrow(() -> new BadRequestsException("posts not found"));
+        return postsRepo.findByIdAndDeletedAtIsNull(id).orElseThrow(() -> new NotFoundException("posts not found"));
     }
 
     public List<Posts> getReplyFromPosts(UUID id, int page) {
         Pageable data = PageRequest.of(page, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
         return postsRepo.findByReplyTo_Id(id, data).getContent();
+    }
+
+    private void deletePostsMediaFiles(List<PostsMedia> media) {
+        media.forEach((m) -> {
+            String[] path = m.getMediaUrl()
+                    .replaceFirst("^/", "")
+                    .split("/");
+
+            try {
+                storage.deletePublicFile(path);
+            } catch (IOException e) {
+                System.out.println("ERROR WHILE DELETING THE POSTS ");
+            }
+        });
+    }
+
+    @Transactional
+    public void deletePosts(UUID id) {
+        Posts postsToDelete = postsRepo.findById(id).orElseThrow(
+                () -> new NotFoundException("posts with this id is not found, delete operation is canceled"));
+        if (postsToDelete.getMedia() != null && postsToDelete.getMedia().size() != 0) {
+            deletePostsMediaFiles(postsToDelete.getMedia());
+            postsToDelete.getMedia().clear();
+        }
+
+        postsToDelete.setDeletedAt(LocalDateTime.now());
     }
 }

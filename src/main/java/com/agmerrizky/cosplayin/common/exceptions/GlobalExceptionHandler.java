@@ -81,4 +81,16 @@ public class GlobalExceptionHandler {
                                                 .build());
         }
 
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse<String>> handleUncaughtException(Exception ex) {
+
+                ex.printStackTrace();
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(
+                                                ErrorResponse.<String>builder()
+                                                                .error("something wrong with the server, heres the stack trace o debug in dev mode : "
+                                                                                + ex.getMessage())
+                                                                .build());
+        }
 }
